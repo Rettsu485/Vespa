@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MedTrack — учёт лекарств</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>💊 MedTrack</h1>
+  <nav>
+    <button class="tab active" data-tab="day">День</button>
+    <button class="tab" data-tab="meds">Лекарства</button>
+    <button class="tab" data-tab="sched">Расписание</button>
+    <button class="tab" data-tab="history">История</button>
+  </nav>
+</header>
+
+<!-- ============ ДЕНЬ ============ -->
+<section id="tab-day" class="panel">
+  <div class="toolbar">
+    <button id="prevDay">←</button>
+    <input type="date" id="dayPicker">
+    <button id="nextDay">→</button>
+    <button id="todayBtn">Сегодня</button>
+    <span id="daySummary" class="muted"></span>
+  </div>
+  <div id="warnings" class="warnings"></div>
+  <div id="dayCards" class="cards"></div>
+  <div id="extraDoses" class="muted"></div>
+</section>
+
+<!-- ============ ЛЕКАРСТВА ============ -->
+<section id="tab-meds" class="panel hidden">
+  <div class="toolbar">
+    <button id="addMedBtn" class="primary">+ Добавить лекарство</button>
+    <label class="muted"><input type="checkbox" id="showArchived"> показывать архив</label>
+    <span class="spacer"></span>
+    <form id="importForm" enctype="multipart/form-data" class="inline">
+      <input type="file" name="file" id="excelFile" accept=".xlsx,.xlsm">
+      <button type="submit" class="secondary">Импорт из Excel</button>
+    </form>
+  </div>
+  <div id="importMsg" class="muted"></div>
+  <table class="list" id="medTable">
+    <thead><tr><th>Название</th><th>Тип</th><th>Дозировка</th><th>Описание</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- ============ РАСПИСАНИЕ ============ -->
+<section id="tab-sched" class="panel hidden">
+  <div class="toolbar">
+    <button id="addSchedBtn" class="primary">+ Новый план приёма</button>
+    <span class="muted">План действует с даты «с» по дату «по». Меняйте расписание хоть каждый день.</span>
+  </div>
+  <table class="list" id="schedTable">
+    <thead><tr><th>Лекарство</th><th>Частота</th><th>Время приёма</th><th>Действует</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<!-- ============ ИСТОРИЯ ============ -->
+<section id="tab-history" class="panel hidden">
+  <div class="toolbar">
+    <label>За последние <input type="number" id="histDays" value="7" min="1" max="365" style="width:70px"> дней</label>
+    <button id="histRefresh" class="secondary">Обновить</button>
+  </div>
+  <div id="histGrid"></div>
+</section>
+
+<!-- ============ МОДАЛКИ ============ -->
+<dialog id="medDlg">
+  <form method="dialog" id="medForm">
+    <h3 id="medDlgTitle">Новое лекарство</h3>
+    <input type="hidden" name="id">
+    <label>Название* <input name="name" required placeholder="Например: Нурофен"></label>
+    <label>Тип <select name="med_type" id="medTypeSel"></select></label>
+    <label>Дозировка <input name="dosage" placeholder="Например: 400 мг"></label>
+    <label>Цвет <input type="color" name="color" value="#4ade80"></label>
+    <label>Описание / показания <textarea name="description" rows="3" placeholder="От чего, как принимать, особенности…"></textarea></label>
+    <label><input type="checkbox" name="archived"> В архив (скрыть из плана)</label>
+    <div class="dlgButtons">
+      <button value="cancel" class="secondary">Отмена</button>
+      <button value="save" class="primary">Сохранить</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="schedDlg">
+  <form method="dialog" id="schedForm">
+    <h3 id="schedDlgTitle">Новый план</h3>
+    <input type="hidden" name="id">
+    <label>Лекарство <select name="med_id" id="schedMedSel" required></select></label>
+    <label>Частота <select name="frequency" id="freqSel">
+      <option>1×</option><option>2×</option><option>3×</option><option>4×</option>
+      <option>по требованию</option></select></label>
+    <div id="timesBox">
+      <span>Запланированное время:</span>
+      <div id="timeInputs"></div>
+      <button type="button" id="addTime" class="secondary small">+ время</button>
+    </div>
+    <label>Действует с <input type="date" name="valid_from" required></label>
+    <label>Действует по (пусто = бессрочно) <input type="date" name="valid_to"></label>
+    <div class="dlgButtons">
+      <button value="cancel" class="secondary">Отмена</button>
+      <button value="save" class="primary">Сохранить</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="takeDlg">
+  <form method="dialog" id="takeForm">
+    <h3 id="takeTitle">Отметить приём</h3>
+    <input type="hidden" name="med_id">
+    <label>Время <input type="datetime-local" name="taken_at" required></label>
+    <label>Заметка <input name="note" placeholder="Например: после еды"></label>
+    <div class="dlgButtons">
+      <button value="cancel" class="secondary">Отмена</button>
+      <button value="save" class="primary">Принято ✔</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
