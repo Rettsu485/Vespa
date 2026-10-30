@@ -16,6 +16,7 @@ import type {
   Task,
   TaskCheckItem,
   TaskType,
+  TaskView,
   WorkLogEntry,
 } from './types';
 

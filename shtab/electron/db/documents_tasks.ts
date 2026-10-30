@@ -16,6 +16,12 @@ function nowStamp(): string {
   return new Date().toISOString().replace('T', ' ').slice(0, 19);
 }
 
+/**
+ * Тип «сырой» строки SQLite: булевы поля интерфейсов хранятся как 0/1 (INTEGER),
+ * поэтому при чтении из БД они имеют тип number.
+ */
+type RawRow<T> = { [K in keyof T]: T[K] extends boolean ? number : T[K] };
+
 // ---------------- ЭДО ----------------
 interface EdoRow {
   id: number;
@@ -168,7 +174,7 @@ export class EdoRepo {
          deadline, off_control, off_control_date, sub_resolution, approval_number, approval_url, approval_status,
          archived, created_at, updated_at FROM edo_documents WHERE id=?`,
       )
-      .get(id) as EdoDocument & { off_control: number; archived: number } | undefined;
+      .get(id) as RawRow<EdoDocument> | undefined;
     if (!row) throw new Error(`Документ ${id} не найден`);
     return {
       ...row,
@@ -390,7 +396,7 @@ export class TaskRepo {
   }
 
   private byId(id: number): Task {
-    const row = this.db.prepare('SELECT * FROM tasks WHERE id=?').get(id) as (Task & { archived: number }) | undefined;
+    const row = this.db.prepare('SELECT * FROM tasks WHERE id=?').get(id) as RawRow<Task> | undefined;
     if (!row) throw new Error(`Задача ${id} не найдена`);
     return { ...row, archived: row.archived === 1 };
   }
@@ -401,7 +407,7 @@ export class TaskRepo {
       .prepare('SELECT * FROM task_check_items WHERE task_id=? ORDER BY sort_order ASC, id ASC')
       .all(taskId)
       .map((r) => {
-        const row = r as TaskCheckItem & { done: number };
+        const row = r as RawRow<TaskCheckItem>;
         return { ...row, done: row.done === 1 };
       });
   }
@@ -418,7 +424,7 @@ export class TaskRepo {
 
   updateCheckItem(id: number, input: Partial<Pick<TaskCheckItem, 'title' | 'done'>>): TaskCheckItem {
     const row = this.db.prepare('SELECT * FROM task_check_items WHERE id=?').get(id) as
-      | (TaskCheckItem & { done: number })
+      | RawRow<TaskCheckItem>
       | undefined;
     if (!row) throw new Error(`Пункт чек-листа ${id} не найден`);
     const merged = { ...row, ...input };
