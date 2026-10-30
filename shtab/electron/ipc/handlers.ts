@@ -1,7 +1,7 @@
 // IPC-слой: регистрация типизированных handlers в main-процессе.
 // Renderer не имеет прямого доступа к БД — только через эти каналы.
 import { ipcMain } from 'electron';
-import type { Db } from './db/database';
+import type { Db } from '../db/database';
 import { EmployeeRepo } from './db/employees';
 import { MonitoringRepo, TaskTypeRepo } from './db/monitorings';
 import { EdoRepo, TaskRepo, WorkLogRepo, applyDocLink } from './db/documents_tasks';
@@ -10,14 +10,15 @@ import { buildDashboard, globalSearch } from './db/dashboard';
 import { loadDemoData, clearAllData } from './db/demo';
 import {
   IPC,
+  type EdoInput,
   type EdoListOpts,
   type EmployeeInput,
   type MonitoringInput,
   type MonitoringListOpts,
   type TaskInput,
   type TaskListOpts,
-} from '../shared/ipc';
-import type { Absence, AppSettings, WorkLogEntry } from '../shared/types';
+} from '../../shared/ipc';
+import type { Absence, AppSettings, WorkLogEntry } from '../../shared/types';
 
 type Handler = (...args: unknown[]) => unknown;
 
