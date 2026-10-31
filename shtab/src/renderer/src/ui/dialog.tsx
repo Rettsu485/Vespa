@@ -22,10 +22,10 @@ export function DialogContent({
 }) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in" />
+      <DialogPrimitive.Overlay className="animate-overlay-in fixed inset-0 z-50 bg-black/50" />
       <DialogPrimitive.Content
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card p-6 shadow-xl transition-theme',
+          'animate-dialog-in fixed left-1/2 top-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card p-6 shadow-xl transition-theme',
           wide ? 'max-w-3xl' : 'max-w-lg',
           className
         )}
@@ -62,11 +62,11 @@ export function Sheet({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/40" />
+        <DialogPrimitive.Overlay className="animate-overlay-in fixed inset-0 z-40 bg-black/40" />
         <DialogPrimitive.Content
           className={cn(
             'fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l bg-card shadow-2xl outline-none',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right duration-200',
+            open ? 'animate-sheet-in' : '',
             width
           )}
         >

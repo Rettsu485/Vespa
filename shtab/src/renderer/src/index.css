@@ -86,3 +86,27 @@
     transition-timing-function: ease-in-out;
   }
 }
+
+/* Простые анимации появления/исчезновения (без tailwindcss-animate) */
+@keyframes shtab-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes shtab-slide-in-right {
+  from { transform: translateX(24px); opacity: 0.4; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes shtab-dialog-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.animate-overlay-in { animation: shtab-fade-in 150ms ease-out; }
+.animate-sheet-in { animation: shtab-slide-in-right 200ms ease-out; }
+.animate-dialog-in { animation: shtab-dialog-in 160ms ease-out; }
+
+/* Плотность таблиц: компактный режим уменьшает вертикальные отступы ячеек (ТЗ п.4). */
+.density-compact table.shtab-table td,
+.density-compact table.shtab-table th {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}

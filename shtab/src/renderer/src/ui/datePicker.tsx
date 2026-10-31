@@ -10,21 +10,29 @@ import { cn } from '@/renderer/src/lib/cn';
 import { Button, Input } from './primitives';
 
 const calendarClassnames = {
-  root: 'p-3',
-  months: 'flex flex-col sm:flex-row gap-4',
-  month: 'flex flex-col gap-4',
-  month_caption: 'flex justify-center pt-1 relative items-center h-8',
-  caption_label: 'text-sm font-medium capitalize',
-  nav: 'flex gap-1 absolute right-0',
-  button_previous: 'inline-flex h-7 w-7 items-center justify-center rounded-md opacity-60 hover:opacity-100 hover:bg-accent',
-  button_next: 'inline-flex h-7 w-7 items-center justify-center rounded-md opacity-60 hover:opacity-100 hover:bg-accent',
-  week_header: 'flex w-full pt-2',
-  weekday: 'flex-1 text-[0.65rem] uppercase text-muted-foreground font-normal text-center',
-  weeks: 'flex flex-col gap-1',
-  week: 'flex w-full',
-  day: 'relative p-0 text-center text-sm flex-1',
-  day_button: 'inline-flex h-8 w-8 items-center justify-center rounded-md transition-theme hover:bg-accent aria-selected:bg-primary aria-selected:text-primary-foreground aria-disabled:opacity-30 aria-disabled:hover:bg-transparent',
+  root: 'rdp-root p-3',
+  months: 'rdp-months flex flex-col sm:flex-row gap-4',
+  month: 'rdp-month flex flex-col gap-2',
+  month_caption: 'rdp-month-caption flex justify-center pt-1 relative items-center h-8',
+  caption_label: 'rdp-caption-label text-sm font-medium capitalize',
+  nav: 'rdp-nav flex gap-1 absolute right-0',
+  button_previous: 'rdp-button-prev inline-flex h-7 w-7 items-center justify-center rounded-md opacity-60 hover:opacity-100 hover:bg-accent',
+  button_next: 'rdp-button-next inline-flex h-7 w-7 items-center justify-center rounded-md opacity-60 hover:opacity-100 hover:bg-accent',
+  week_header: 'rdp-week-header flex w-full pt-2',
+  weekday: 'rdp-weekday flex-1 text-[0.65rem] uppercase text-muted-foreground font-normal text-center',
+  weeks: 'rdp-weeks flex flex-col gap-1',
+  week: 'rdp-week flex w-full',
+  day_button: 'rdp-day-button inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-150 hover:bg-accent aria-selected:bg-primary aria-selected:text-primary-foreground aria-disabled:opacity-30 aria-disabled:hover:bg-transparent',
+  day_selected: 'rdp-selected',
+  day_today: 'rdp-today font-semibold',
+  range_start: 'rdp-range-start',
+  range_end: 'rdp-range-end',
+  range_middle: 'rdp-range-middle bg-accent rounded-none',
 };
+
+function toIso(d: Date | undefined): string | null {
+  return d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : null;
+}
 
 export function DatePicker({
   value,
@@ -46,7 +54,7 @@ export function DatePicker({
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={(o) => !disabled && setOpen(o)}>
       <PopoverPrimitive.Trigger asChild disabled={disabled}>
-        <Button variant="outline" className={cn('justify-start font-normal', !value && 'text-muted-foreground')}>
+        <Button variant="outline" className={cn('justify-start font-normal', !value && 'text-muted-foreground')} tabIndex={-1}>
           <CalendarDays className="h-4 w-4 opacity-60" />
           {value ? fmtDate(value) : placeholder}
         </Button>
@@ -63,8 +71,7 @@ export function DatePicker({
             endMonth={new Date(new Date().getFullYear() + 15, 11)}
             onSelect={(d) => {
               if (d) {
-                const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                onChange(iso);
+                onChange(toIso(d));
               } else if (clearable) {
                 onChange(null);
               }
@@ -108,9 +115,6 @@ export function DateRangeField({
       ? { from: from ? new Date(from + 'T00:00:00') : undefined, to: to ? new Date(to + 'T00:00:00') : undefined }
       : undefined;
 
-  const iso = (d: Date | undefined): string | null =>
-    d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : null;
-
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
       <PopoverPrimitive.Trigger asChild>
@@ -134,7 +138,7 @@ export function DateRangeField({
             numberOfMonths={2}
             onSelect={(r) => {
               if (r?.from && r?.to) {
-                onChange(iso(r.from), iso(r.to));
+                onChange(toIso(r.from), toIso(r.to));
                 setOpen(false);
               }
             }}

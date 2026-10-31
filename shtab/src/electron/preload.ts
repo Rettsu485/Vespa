@@ -1,4 +1,5 @@
 // Preload: типизированный мост window.api ↔ main через contextBridge.
+// sandbox:false → обычный require, esbuild собирает в CJS.
 
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC_CHANNEL, apiMethodsList, type ApiMethodName, type IpcResponse, type ShtabApi } from '../shared/ipc';

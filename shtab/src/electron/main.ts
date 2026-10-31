@@ -2,7 +2,7 @@
 
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'node:path';
-import { getBackupDir, getDbFile, initDatabase } from './db/database';
+import { getBackupDir, initDatabase } from './db/database';
 import { TeamRepository } from './repositories/teamRepo';
 import { MonitoringRepository } from './repositories/monitoringRepo';
 import { EdoRepository, WorkLogRepository } from './repositories/edoRepo';
@@ -225,8 +225,7 @@ if (!gotLock) {
     } catch (err) {
       console.error('Не удалось создать резервную копию:', err);
     }
-    void getDbFile;
-
+    
     createWindow();
 
     app.on('activate', () => {
