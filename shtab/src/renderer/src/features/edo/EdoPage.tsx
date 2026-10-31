@@ -75,7 +75,7 @@ export function EdoPage() {
     });
   }, [store]);
 
-  const loaded = useLoad<EdoDocumentView[]>(
+  const { data: loaded } = useLoad<EdoDocumentView[]>(
     () =>
       api.edoList({
         controlType: controlFilter && controlFilter !== '__all' ? controlFilter : null,

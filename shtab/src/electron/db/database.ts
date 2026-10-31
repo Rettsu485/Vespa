@@ -7,6 +7,28 @@ import { migrations } from './migrations';
 
 export type Db = Database.Database;
 
+/**
+ * Типизированная обёртка над better-sqlite3: prepare<T> возвращает statements
+ * с типизированными строками результата (в v12 дженерик у prepare недоступен,
+ * приведение изолировано здесь — в репозиториях остаётся только .all()/.get()).
+ */
+export interface PreparedStmt<T> {
+  all(...params: Database.BindParams): T[];
+  get(...params: Database.BindParams): T | undefined;
+  run(...params: Database.BindParams): Database.RunResult;
+}
+
+export interface TypedDb {
+  prepare<T>(sql: string): PreparedStmt<T>;
+  exec(sql: string): void;
+  pragma(sql: string, options?: { simple?: boolean }): unknown;
+  transaction<F extends (...args: never[]) => unknown>(fn: F): F;
+}
+
+export function typed(db: Db): TypedDb {
+  return db as unknown as TypedDb;
+}
+
 let dbInstance: Db | null = null;
 let dbFilePath = '';
 

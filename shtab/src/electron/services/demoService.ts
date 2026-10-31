@@ -1,21 +1,21 @@
 // Загрузка демо-данных (кнопка в Настройках). Данные «приземлены» к текущей дате,
 // чтобы на дашборде были просрочки, горящие сроки, дни рождения и красные флаги.
 
-import type { Db } from '../db/database';
+import { typed, type TypedDb } from '../db/database';
 import { nowSqlTimestamp } from '../db/dates';
 import { shiftIso } from '../repositories/teamRepo';
 import { todayIso } from '../db/dates';
 
 type Row = Record<string, string | number | null>;
 
-function insert(db: Db, table: string, row: Row): number {
+function insert(db: TypedDb, table: string, row: Row): number {
   const keys = Object.keys(row);
   const stmt = db.prepare(`INSERT INTO ${table} (${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`);
   const res = stmt.run(...keys.map((k) => row[k]));
   return Number(res.lastInsertRowid);
 }
 
-export function loadDemoData(db: Db): void {
+export function loadDemoData(db: TypedDb): void {
   const today = todayIso();
   const d = (offset: number) => shiftIso(today, offset);
   const ts = nowSqlTimestamp();

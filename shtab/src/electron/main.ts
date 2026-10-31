@@ -66,7 +66,8 @@ function createWindow(): void {
 }
 
 function setupServices() {
-  const db = initDatabase(app.getPath('userData'));
+  const rawDb = initDatabase(app.getPath('userData'));
+  const db = typed(rawDb);
   const settings = new SettingsService(db);
   const team = new TeamRepository(db);
   const monitorings = new MonitoringRepository(db);
@@ -179,11 +180,11 @@ function buildHandlers(h: Handlers): Record<string, (...args: unknown[]) => unkn
     },
     wipeAll: () => {
       const tables = ['task_check_items', 'work_log', 'tasks', 'edo_documents', 'monitorings', 'absences', 'employees', 'departments'];
-      h.db.transaction(() => {
-        for (const t of tables) h.db.prepare(`DELETE FROM ${t}`).run();
-        h.db.prepare("DELETE FROM task_types WHERE name NOT IN ('Мониторинг','Письмо','Таблица')").run();
-        h.db.prepare('UPDATE task_types SET sort_order = id').run();
-        h.db.prepare('DELETE FROM settings').run();
+      h.rawDb.transaction(() => {
+        for (const t of tables) h.rawDb.prepare(`DELETE FROM ${t}`).run();
+        h.rawDb.prepare("DELETE FROM task_types WHERE name NOT IN ('Мониторинг','Письмо','Таблица')").run();
+        h.rawDb.prepare('UPDATE task_types SET sort_order = id').run();
+        h.rawDb.prepare('DELETE FROM settings').run();
       })();
     },
   };

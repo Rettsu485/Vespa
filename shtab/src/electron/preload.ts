@@ -14,11 +14,13 @@ function call(method: ApiMethodName, ...args: unknown[]): Promise<unknown> {
   });
 }
 
+// Прокси: generic-аргументы prepare в better-sqlite3 не позволяют типизировать мост напрямую,
+// поэтому собираем методы динамически и приводим через unknown (единственное место с таким приведением).
 const api: ShtabApi = Object.fromEntries(
   METHOD_NAMES.map((method) => [
     method,
     (...args: unknown[]) => call(method, ...args),
   ])
-) as ShtabApi;
+) as unknown as ShtabApi;
 
 contextBridge.exposeInMainWorld('api', api);

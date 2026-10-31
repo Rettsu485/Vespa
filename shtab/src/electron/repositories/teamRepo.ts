@@ -1,6 +1,6 @@
 // Репозиторий сотрудников, отделов и отсутствий. Вычисление статусов — здесь.
 
-import type { Db } from '../db/database';
+import { typed, type TypedDb } from '../db/database';
 import { daysToBirthday, nowSqlTimestamp, todayIso } from '../db/dates';
 import type {
   Absence,
@@ -48,13 +48,13 @@ const ABSENCE_LABELS: Record<AbsenceType, { label: string; kind: EmployeeStatusI
 };
 
 export class TeamRepository {
-  constructor(private db: Db) {}
+  constructor(private db: TypedDb) {}
 
   // ── Отделы ────────────────────────────────────────────────
 
   listDepartments(): Department[] {
     return this.db
-      .prepare<[never], Department>(`SELECT id, name, parent_id, sort_order FROM departments ORDER BY sort_order, name`)
+      .prepare(`SELECT id, name, parent_id, sort_order FROM departments ORDER BY sort_order, name`)
       .all();
   }
 
@@ -84,7 +84,7 @@ export class TeamRepository {
     let cur: number | null = input.parent_id;
     while (cur != null) {
       if (cur === id) throw new Error('Нельзя создать цикл в структуре отделов');
-      const parent = this.db.prepare<[number], { parent_id: number | null }>('SELECT parent_id FROM departments WHERE id = ?').get(cur);
+      const parent = this.db.prepare('SELECT parent_id FROM departments WHERE id = ?').get(cur);
       cur = parent?.parent_id ?? null;
     }
     this.db.prepare('UPDATE departments SET name = ?, parent_id = ?, sort_order = ? WHERE id = ?').run(input.name, input.parent_id, input.sort_order, id);
@@ -92,15 +92,15 @@ export class TeamRepository {
   }
 
   deleteDepartment(id: number): void {
-    const empCount = this.db.prepare<[number], { c: number }>('SELECT COUNT(*) AS c FROM employees WHERE department_id = ?').get(id)!.c;
+    const empCount = this.db.prepare('SELECT COUNT(*) AS c FROM employees WHERE department_id = ?').get(id)!.c;
     if (empCount > 0) throw new Error('В отделе есть сотрудники — сначала переместите их');
-    const childCount = this.db.prepare<[number], { c: number }>('SELECT COUNT(*) AS c FROM departments WHERE parent_id = ?').get(id)!.c;
+    const childCount = this.db.prepare('SELECT COUNT(*) AS c FROM departments WHERE parent_id = ?').get(id)!.c;
     if (childCount > 0) throw new Error('У отдела есть подразделения — сначала удалите их');
     this.db.prepare('DELETE FROM departments WHERE id = ?').run(id);
   }
 
   private getDepartment(id: number): Department {
-    const row = this.db.prepare<[number], Department>('SELECT id, name, parent_id, sort_order FROM departments WHERE id = ?').get(id);
+    const row = this.db.prepare('SELECT id, name, parent_id, sort_order FROM departments WHERE id = ?').get(id);
     if (!row) throw new Error('Отдел не найден');
     return row;
   }
@@ -109,7 +109,7 @@ export class TeamRepository {
 
   listAbsencesByEmployee(employeeId: number): Absence[] {
     return this.db
-      .prepare<[number], AbsenceRow>('SELECT * FROM absences WHERE employee_id = ? ORDER BY date_from DESC')
+      .prepare('SELECT * FROM absences WHERE employee_id = ? ORDER BY date_from DESC')
       .all(employeeId);
   }
 
@@ -134,7 +134,7 @@ export class TeamRepository {
   }
 
   private getAbsence(id: number): Absence {
-    const row = this.db.prepare<[number], AbsenceRow>('SELECT * FROM absences WHERE id = ?').get(id);
+    const row = this.db.prepare('SELECT * FROM absences WHERE id = ?').get(id);
     if (!row) throw new Error('Запись об отсутствии не найдена');
     return row;
   }
@@ -144,7 +144,7 @@ export class TeamRepository {
     const today = todayIso();
     const end = shiftIso(today, daysAhead);
     return this.db
-      .prepare<[string, string], AbsenceTimelineItem>(
+      .prepare(
         `SELECT a.employee_id, e.full_name AS employee_name, a.absence_type, a.date_from, a.date_to, a.note
          FROM absences a JOIN employees e ON e.id = a.employee_id
          WHERE a.date_from <= ? AND a.date_to >= ? AND e.archived = 0 AND e.is_fired = 0
@@ -166,12 +166,12 @@ export class TeamRepository {
       )
       .all() as EmployeeRow[];
     const activeAbsences = this.db
-      .prepare<[string, string], AbsenceRow & { rank: number }>(
+      .prepare(
         `SELECT *, 1 AS rank FROM absences WHERE date_from <= ? AND date_to >= ?`
       )
       .all(today, today);
     const upcomingAbsences = this.db
-      .prepare<[string, string], AbsenceRow>(
+      .prepare(
         `SELECT * FROM absences WHERE date_from > ? ORDER BY date_from ASC`
       )
       .all(today);

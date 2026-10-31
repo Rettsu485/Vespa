@@ -1,6 +1,6 @@
 // Дашборд «Сегодня» и глобальный поиск (Ctrl+K).
 
-import type { Db } from '../db/database';
+import { typed, type TypedDb } from '../db/database';
 import { daysBetween, todayIso } from '../db/dates';
 import { EdoRepository, WorkLogRepository } from '../repositories/edoRepo';
 import { MonitoringRepository } from '../repositories/monitoringRepo';
@@ -10,7 +10,7 @@ import type { SettingsService } from './settingsService';
 import type { DashboardData, SearchResults } from '../../shared/types';
 
 export interface DashboardServices {
-  db: Db;
+  db: TypedDb;
   settings: SettingsService;
   team: TeamRepository;
   monitorings: MonitoringRepository;
@@ -81,13 +81,13 @@ export function globalSearch(s: DashboardServices, query: string): SearchResults
   const limit = 8;
 
   const employees = s.db
-    .prepare<[string], { id: number; full_name: string; position: string }>(
+    .prepare(
       `SELECT id, full_name, position FROM employees WHERE archived = 0 AND (lower(full_name) LIKE ? OR lower(position) LIKE ?) LIMIT ${limit}`
     )
     .all(like, like);
 
   const monitorings = s.db
-    .prepare<[string], { id: number; name: string; type_name: string; employee_name: string }>(
+    .prepare(
       `SELECT m.id, m.name, tt.name AS type_name, e.full_name AS employee_name
        FROM monitorings m JOIN task_types tt ON tt.id = m.type_id JOIN employees e ON e.id = m.employee_id
        WHERE m.status != 'архив' AND lower(m.name) LIKE ? LIMIT ${limit}`
@@ -95,13 +95,13 @@ export function globalSearch(s: DashboardServices, query: string): SearchResults
     .all(like);
 
   const edo = s.db
-    .prepare<[string], { id: number; doc_number: string; summary: string }>(
+    .prepare(
       `SELECT id, doc_number, summary FROM edo_documents WHERE archived = 0 AND (lower(doc_number) LIKE ? OR lower(summary) LIKE ?) LIMIT ${limit}`
     )
     .all(like, like);
 
   const tasks = s.db
-    .prepare<[string], { id: number; title: string; theme: string; status: string }>(
+    .prepare(
       `SELECT id, title, theme, status FROM tasks WHERE archived = 0 AND status NOT IN ('выполнено','отменено') AND (lower(title) LIKE ? OR lower(theme) LIKE ?) LIMIT ${limit}`
     )
     .all(like, like);

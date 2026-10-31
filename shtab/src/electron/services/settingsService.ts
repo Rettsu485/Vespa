@@ -1,15 +1,15 @@
 // Настройки: пара ключ–значение (JSON) в таблице settings.
 
-import type { Db } from '../db/database';
+import { typed, type TypedDb } from '../db/database';
 import { DEFAULT_SETTINGS, type AppSettings } from '../../shared/types';
 
 const SETTINGS_KEY = 'app';
 
 export class SettingsService {
-  constructor(private db: Db) {}
+  constructor(private db: TypedDb) {}
 
   get(): AppSettings {
-    const row = this.db.prepare<[string], { value: string }>('SELECT value FROM settings WHERE key = ?').get(SETTINGS_KEY);
+    const row = this.db.prepare('SELECT value FROM settings WHERE key = ?').get(SETTINGS_KEY);
     if (!row) return { ...DEFAULT_SETTINGS };
     try {
       const parsed: unknown = JSON.parse(row.value);

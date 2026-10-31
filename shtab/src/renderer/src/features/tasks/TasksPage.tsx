@@ -38,7 +38,7 @@ export function TasksPage() {
     });
   }, [store]);
 
-  const loaded = useLoad<TaskView[]>(
+  const { data: loaded } = useLoad<TaskView[]>(
     () => api.taskList({ includeArchived }),
     [includeArchived, store.version]
   );
