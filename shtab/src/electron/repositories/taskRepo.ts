@@ -1,6 +1,14 @@
 // Репозиторий личных задач с чек-листами. Автопробуждение из «ожидания» — при каждом списке/получении.
 
-import { typed, type TypedDb } from '../db/database';
+import type { TypedDb } from '../db/database';
+
+interface CheckItemRow {
+  id: number;
+  task_id: number;
+  title: string;
+  done: number;
+  sort_order: number;
+}
 import { daysBetween, nowSqlTimestamp, todayIso } from '../db/dates';
 import type { Task, TaskCheckItem, TaskView } from '../../shared/types';
 
@@ -56,7 +64,7 @@ export class TaskRepository {
 
   get(id: number): TaskView | null {
     const wokenIds = new Set(this.wakeUpExpired());
-    const row = this.db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+    const row = this.db.prepare<TaskRow>('SELECT * FROM tasks WHERE id = ?').get(id);
     return row ? { ...this.toView(row), returned_today: wokenIds.has(row.id) } : null;
   }
 
@@ -97,7 +105,7 @@ export class TaskRepository {
 
   listItems(taskId: number): TaskCheckItem[] {
     const rows = this.db
-      .prepare(
+      .prepare<CheckItemRow>(
         'SELECT id, task_id, title, done, sort_order FROM task_check_items WHERE task_id = ? ORDER BY sort_order, id'
       )
       .all(taskId);
@@ -134,7 +142,7 @@ export class TaskRepository {
 
   private getItemOrNull(id: number): TaskCheckItem | null {
     const r = this.db
-      .prepare('SELECT * FROM task_check_items WHERE id = ?')
+      .prepare<CheckItemRow>('SELECT * FROM task_check_items WHERE id = ?')
       .get(id);
     if (!r) return null;
     return { id: r.id, task_id: r.task_id, title: r.title, done: r.done === 1, sort_order: r.sort_order };
@@ -153,10 +161,10 @@ export class TaskRepository {
   private toView(r: TaskRow): TaskView {
     const today = todayIso();
     const items = this.db
-      .prepare('SELECT COUNT(*) AS total, COALESCE(SUM(done),0) AS done FROM task_check_items WHERE task_id = ?')
+      .prepare<{ total: number; done: number }>('SELECT COUNT(*) AS total, COALESCE(SUM(done),0) AS done FROM task_check_items WHERE task_id = ?')
       .get(r.id)!;
     const lastLog = this.db
-      .prepare('SELECT MAX(log_date) AS d FROM work_log WHERE entity_type = ? AND entity_id = ?')
+      .prepare<{ d: string | null }>('SELECT MAX(log_date) AS d FROM work_log WHERE entity_type = ? AND entity_id = ?')
       .get('task', r.id);
     const lastActivity = [r.updated_at.slice(0, 10), lastLog?.d ?? null].filter(Boolean).sort().reverse()[0] ?? r.created_at.slice(0, 10);
     const daysSinceUpdate = daysBetween(today, lastActivity);
@@ -190,7 +198,7 @@ export class TaskRepository {
   returnedFromWaitToday(): number[] {
     const today = todayIso();
     const rows = this.db
-      .prepare(
+      .prepare<{ id: number }>(
         `SELECT DISTINCT entity_id AS id FROM work_log WHERE entity_type = 'task' AND log_date = ? AND text LIKE 'Автопробуждение%'`
       )
       .all(today);
@@ -207,7 +215,7 @@ export class TaskRepository {
   findWaitingDueToday(): number[] {
     const today = todayIso();
     const rows = this.db
-      .prepare(`SELECT id FROM tasks WHERE status = 'ожидание' AND wait_until IS NOT NULL AND wait_until <= ?`)
+      .prepare<{ id: number }>(`SELECT id FROM tasks WHERE status = 'ожидание' AND wait_until IS NOT NULL AND wait_until <= ?`)
       .all(today);
     return rows.map((r) => r.id);
   }

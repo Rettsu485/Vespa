@@ -13,9 +13,9 @@ export type Db = Database.Database;
  * приведение изолировано здесь — в репозиториях остаётся только .all()/.get()).
  */
 export interface PreparedStmt<T> {
-  all(...params: Database.BindParams): T[];
-  get(...params: Database.BindParams): T | undefined;
-  run(...params: Database.BindParams): Database.RunResult;
+  all(...params: unknown[]): T[];
+  get(...params: unknown[]): T | undefined;
+  run(...params: unknown[]): Database.RunResult;
 }
 
 export interface TypedDb {

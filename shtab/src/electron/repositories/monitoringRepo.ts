@@ -1,6 +1,6 @@
 // Репозиторий мониторингов и справочника типов задач.
 
-import { typed, type TypedDb } from '../db/database';
+import type { TypedDb } from '../db/database';
 import { nowSqlTimestamp, todayIso } from '../db/dates';
 import type { Monitoring, MonitoringView, TaskType } from '../../shared/types';
 
@@ -48,7 +48,7 @@ export class MonitoringRepository {
   }
 
   deleteTaskType(id: number): void {
-    const used = this.db.prepare('SELECT COUNT(*) AS c FROM monitorings WHERE type_id = ?').get(id)!.c;
+    const used = this.db.prepare<{ c: number }>('SELECT COUNT(*) AS c FROM monitorings WHERE type_id = ?').get(id)!.c;
     if (used > 0) throw new Error('Тип используется в мониторингах — удаление заблокировано');
     this.db.prepare('DELETE FROM task_types WHERE id = ?').run(id);
   }
@@ -61,7 +61,7 @@ export class MonitoringRepository {
   }
 
   private getTaskType(id: number): TaskType {
-    const r = this.db.prepare('SELECT * FROM task_types WHERE id = ?').get(id);
+    const r = this.db.prepare<TaskTypeRow>('SELECT * FROM task_types WHERE id = ?').get(id);
     if (!r) throw new Error('Тип задачи не найден');
     return { id: r.id, name: r.name, sort_order: r.sort_order, active: r.active === 1 };
   }
@@ -96,7 +96,7 @@ export class MonitoringRepository {
   }
 
   getMonitoring(id: number): MonitoringView | null {
-    const row = this.db.prepare('SELECT * FROM monitorings WHERE id = ?').get(id);
+    const row = this.db.prepare<MonitoringRow>('SELECT * FROM monitorings WHERE id = ?').get(id);
     if (!row) return null;
     return this.toView(row, this.currentlyAbsentEmployeeIds());
   }
@@ -130,7 +130,7 @@ export class MonitoringRepository {
   currentlyAbsentEmployeeIds(): Set<number> {
     const today = todayIso();
     const rows = this.db
-      .prepare(
+      .prepare<{ employee_id: number }>(
         `SELECT DISTINCT a.employee_id FROM absences a JOIN employees e ON e.id = a.employee_id
          WHERE a.date_from <= ? AND a.date_to >= ? AND e.is_fired = 0 AND e.archived = 0`
       )
@@ -145,10 +145,10 @@ export class MonitoringRepository {
   }
 
   private toView(m: MonitoringRow, absentIds: Set<number>): MonitoringView {
-    const type = this.db.prepare('SELECT name FROM task_types WHERE id = ?').get(m.type_id);
-    const emp = this.db.prepare('SELECT full_name FROM employees WHERE id = ?').get(m.employee_id);
+    const type = this.db.prepare<{ name: string }>('SELECT name FROM task_types WHERE id = ?').get(m.type_id);
+    const emp = this.db.prepare<{ full_name: string }>('SELECT full_name FROM employees WHERE id = ?').get(m.employee_id);
     const deputy = m.deputy_employee_id
-      ? this.db.prepare('SELECT full_name FROM employees WHERE id = ?').get(m.deputy_employee_id)
+      ? this.db.prepare<{ full_name: string }>('SELECT full_name FROM employees WHERE id = ?').get(m.deputy_employee_id)
       : null;
     const today = todayIso();
     const deputyActive =

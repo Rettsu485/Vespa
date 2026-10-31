@@ -1,6 +1,6 @@
 // Репозиторий документов ЭДО и журнала проделанной работы (work_log).
 
-import { typed, type TypedDb } from '../db/database';
+import type { TypedDb } from '../db/database';
 import { daysBetween, nowSqlTimestamp, todayIso } from '../db/dates';
 import type { AppSettings, EdoDocument, EdoDocumentView, WorkLogEntry } from '../../shared/types';
 import type { WorkLogInput } from '../../shared/ipc';
@@ -81,7 +81,7 @@ export class EdoRepository {
   }
 
   get(id: number, settings: AppSettings): EdoDocumentView | null {
-    const row = this.db.prepare('SELECT * FROM edo_documents WHERE id = ?').get(id);
+    const row = this.db.prepare<EdoRow>('SELECT * FROM edo_documents WHERE id = ?').get(id);
     return row ? this.toView(row, settings) : null;
   }
 
@@ -132,7 +132,7 @@ export class EdoRepository {
 
   private toView(r: EdoRow, settings: AppSettings): EdoDocumentView {
     const responsible = r.responsible_id
-      ? this.db.prepare('SELECT full_name FROM employees WHERE id = ?').get(r.responsible_id)
+      ? this.db.prepare<{ full_name: string }>('SELECT full_name FROM employees WHERE id = ?').get(r.responsible_id)
       : null;
     const today = todayIso();
     const daysLeft = r.deadline && !r.off_control ? daysBetween(r.deadline, today) : null;
@@ -167,7 +167,7 @@ export class WorkLogRepository {
 
   list(entityType: 'edo' | 'task', entityId: number): WorkLogEntry[] {
     return this.db
-      .prepare('SELECT * FROM work_log WHERE entity_type = ? AND entity_id = ? ORDER BY log_date DESC, id DESC')
+      .prepare<WorkLogEntry>('SELECT * FROM work_log WHERE entity_type = ? AND entity_id = ? ORDER BY log_date DESC, id DESC')
       .all(entityType, entityId);
   }
 
@@ -175,7 +175,7 @@ export class WorkLogRepository {
     const res = this.db
       .prepare('INSERT INTO work_log (entity_type, entity_id, log_date, text, created_at) VALUES (?, ?, ?, ?, ?)')
       .run(input.entity_type, input.entity_id, input.log_date, input.text, nowSqlTimestamp());
-    const row = this.db.prepare('SELECT * FROM work_log WHERE id = ?').get(Number(res.lastInsertRowid));
+    const row = this.db.prepare<WorkLogEntry>('SELECT * FROM work_log WHERE id = ?').get(Number(res.lastInsertRowid));
     if (!row) throw new Error('Запись не создана');
     return row;
   }

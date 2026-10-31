@@ -1,7 +1,7 @@
 // Загрузка демо-данных (кнопка в Настройках). Данные «приземлены» к текущей дате,
 // чтобы на дашборде были просрочки, горящие сроки, дни рождения и красные флаги.
 
-import { typed, type TypedDb } from '../db/database';
+import type { TypedDb } from '../db/database';
 import { nowSqlTimestamp } from '../db/dates';
 import { shiftIso } from '../repositories/teamRepo';
 import { todayIso } from '../db/dates';

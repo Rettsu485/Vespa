@@ -1,6 +1,6 @@
 // Дашборд «Сегодня» и глобальный поиск (Ctrl+K).
 
-import { typed, type TypedDb } from '../db/database';
+import type { TypedDb } from '../db/database';
 import { daysBetween, todayIso } from '../db/dates';
 import { EdoRepository, WorkLogRepository } from '../repositories/edoRepo';
 import { MonitoringRepository } from '../repositories/monitoringRepo';
@@ -81,13 +81,13 @@ export function globalSearch(s: DashboardServices, query: string): SearchResults
   const limit = 8;
 
   const employees = s.db
-    .prepare(
+    .prepare<{ id: number; full_name: string; position: string }>(
       `SELECT id, full_name, position FROM employees WHERE archived = 0 AND (lower(full_name) LIKE ? OR lower(position) LIKE ?) LIMIT ${limit}`
     )
     .all(like, like);
 
   const monitorings = s.db
-    .prepare(
+    .prepare<{ id: number; name: string; type_name: string; employee_name: string }>(
       `SELECT m.id, m.name, tt.name AS type_name, e.full_name AS employee_name
        FROM monitorings m JOIN task_types tt ON tt.id = m.type_id JOIN employees e ON e.id = m.employee_id
        WHERE m.status != 'архив' AND lower(m.name) LIKE ? LIMIT ${limit}`
@@ -95,13 +95,13 @@ export function globalSearch(s: DashboardServices, query: string): SearchResults
     .all(like);
 
   const edo = s.db
-    .prepare(
+    .prepare<{ id: number; doc_number: string; summary: string }>(
       `SELECT id, doc_number, summary FROM edo_documents WHERE archived = 0 AND (lower(doc_number) LIKE ? OR lower(summary) LIKE ?) LIMIT ${limit}`
     )
     .all(like, like);
 
   const tasks = s.db
-    .prepare(
+    .prepare<{ id: number; title: string; theme: string; status: string }>(
       `SELECT id, title, theme, status FROM tasks WHERE archived = 0 AND status NOT IN ('выполнено','отменено') AND (lower(title) LIKE ? OR lower(theme) LIKE ?) LIMIT ${limit}`
     )
     .all(like, like);

@@ -2,7 +2,7 @@
 
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'node:path';
-import { getBackupDir, initDatabase } from './db/database';
+import { getBackupDir, initDatabase, typed } from './db/database';
 import { TeamRepository } from './repositories/teamRepo';
 import { MonitoringRepository } from './repositories/monitoringRepo';
 import { EdoRepository, WorkLogRepository } from './repositories/edoRepo';
@@ -75,7 +75,7 @@ function setupServices() {
   const tasks = new TaskRepository(db);
   const workLog = new WorkLogRepository(db);
   const services: DashboardServices = { db, settings, team, monitorings, edo, tasks, workLog };
-  return { db, settings, team, monitorings, edo, tasks, workLog, services };
+  return { rawDb, db, settings, team, monitorings, edo, tasks, workLog, services };
 }
 
 type Handlers = ReturnType<typeof setupServices>;
@@ -174,7 +174,7 @@ function buildHandlers(h: Handlers): Record<string, (...args: unknown[]) => unkn
     // ── Дашборд / поиск / обслуживание ─────────────────────
     dashboardGet: () => buildDashboard(h.services),
     searchGlobal: (query) => globalSearch(h.services, String(query ?? '')),
-    backupNow: () => runBackup(h.db, getBackupDir(app.getPath('userData'))),
+    backupNow: () => runBackup(h.rawDb, getBackupDir(app.getPath('userData'))),
     demoLoad: () => {
       loadDemoData(h.db);
     },
@@ -222,7 +222,7 @@ if (!gotLock) {
 
     // Автоматическая резервная копия при каждом запуске (ротация — 30 копий).
     try {
-      runBackup(services.db, getBackupDir(app.getPath('userData')));
+      runBackup(services.rawDb, getBackupDir(app.getPath('userData')));
     } catch (err) {
       console.error('Не удалось создать резервную копию:', err);
     }
