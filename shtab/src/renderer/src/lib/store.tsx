@@ -16,7 +16,7 @@ export type OpenCardEvent =
 
 type Listener = (e: OpenCardEvent) => void;
 
-interface StoreCtx {
+export interface StoreCtx {
   settings: AppSettings;
   setTheme: (m: ThemeMode) => void;
   employees: EmployeeView[];
