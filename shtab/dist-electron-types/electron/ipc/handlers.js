@@ -1,6 +1,7 @@
 // IPC-слой: регистрация типизированных handlers в main-процессе.
 // Renderer не имеет прямого доступа к БД — только через эти каналы.
 import { ipcMain } from 'electron';
+import path from 'node:path';
 import { EmployeeRepo } from '../db/employees';
 import { MonitoringRepo, TaskTypeRepo } from '../db/monitorings';
 import { EdoRepo, TaskRepo, WorkLogRepo, applyDocLink } from '../db/documents_tasks';
@@ -90,7 +91,8 @@ export function registerIpc(db, dbPath, userDataDir) {
     });
     handle(IPC.searchGlobal, (query) => globalSearch(db, query));
     // ---- Обслуживание ----
-    handle(IPC.backupNow, () => backupNow(dbPath, `${userDataDir}/backups`));
+    // backupNow возвращает Promise (см. исправление бага) — ipcMain.handle сам егоAwait-ит на стороне renderer.
+    handle(IPC.backupNow, () => backupNow(dbPath, path.join(userDataDir, 'backups')));
     handle(IPC.loadDemo, () => loadDemoData(db));
     handle(IPC.clearAll, () => clearAllData(db));
 }

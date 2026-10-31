@@ -64,12 +64,13 @@ const docs = new m.Docs.EdoRepo(db).list({});
 console.log('edo list:', docs.length, '| first days_left:', docs[0].days_left, '| link:', docs[0].doc_link ?? '(none)');
 
 const tasks = new m.Docs.TaskRepo(db).list({});
+const allTasks = new m.Docs.TaskRepo(db).list({ includeArchived: true });
 console.log('tasks list:', tasks.length, '| statuses:', [...new Set(tasks.map((t) => t.status))].join(', '));
 
 const mon = new m.Mon.MonitoringRepo(db).list({});
 console.log('monitorings:', mon.length, '| with deputy:', mon.filter((x) => x.deputy_employee_id).length, '| red flags:', mon.filter((x) => x.red_flag).length);
 
-const backupFile = m.backupNow(dbPath, path.join(tmpDir, 'backups'));
-console.log('backup created:', path.basename(backupFile));
+const backupFile = await m.backupNow(dbPath, path.join(tmpDir, 'backups'));
+console.log('backup created:', path.basename(backupFile), '| exists on disk:', fs.existsSync(backupFile));
 console.log('SMOKE OK');
 db.close();

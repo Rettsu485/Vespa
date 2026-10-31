@@ -46,7 +46,13 @@ export function TasksPage() {
     setParams(p);
   };
 
-  const card = (tasks ?? []).find((t) => t.id === taskId) ?? null;
+  // Карточка задачи открывается по id из поиска/дашборда, в т.ч. для архивных
+  // (выполнено/отменено) — поэтому запрашиваем карточку напрямую, а не из списка.
+  const { data: cardData, reload: reloadCard } = useAsync(
+    () => (taskId === null ? Promise.resolve(null) : api.tasks.get(taskId)),
+    [taskId],
+  );
+  const card = taskId === null ? null : (cardData ?? (tasks ?? []).find((t) => t.id === taskId) ?? null);
 
   return (
     <div className="grid gap-4">
@@ -135,7 +141,10 @@ export function TasksPage() {
           <TaskSheet
             task={card}
             onEdit={() => setFormId(card.id)}
-            onChanged={reload}
+            onChanged={() => {
+              reload();
+              reloadCard();
+            }}
             onArchive={async () => {
               await api.tasks.archive(card.id);
               openTask(null);

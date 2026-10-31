@@ -36,14 +36,20 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 /** Ротация: храним последние N резервных копий. */
 const BACKUP_KEEP = 30;
 
-export function backupNow(dbPath: string, backupsDir: string): string {
+/**
+ * Резервная копия БД. Мелкий баг предыдущей версии: backup() — асинхронный,
+ * а source.close() вызывался сразу же, до записи файла; ротация тоже считала
+ * mtime несуществующего файла. Теперь функция возвращает Promise, который
+ * резолвится после фактической записи копии; вызывающий код обязан её ждать.
+ */
+export async function backupNow(dbPath: string, backupsDir: string): Promise<string> {
   fs.mkdirSync(backupsDir, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const target = path.join(backupsDir, `shtab-${stamp}.db`);
-  // «холодная» консистентная копия через backup API better-sqlite3.
+  // Консистентная «горячая» копия через backup API better-sqlite3 (WAL-safe).
   const source = new Database(dbPath, { readonly: true });
   try {
-    source.backup(target).then(() => undefined, (e) => console.error('backup failed:', e));
+    await source.backup(target);
   } finally {
     source.close();
   }

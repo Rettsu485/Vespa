@@ -50,15 +50,16 @@ else {
             mainWindow.focus();
         }
     });
-    void app.whenReady().then(() => {
+    void app.whenReady().then(async () => {
         // Название папки userData и заголовка окна — «Штаб» (в package.json name — ASCII).
         app.setName('Штаб');
         const userDataDir = app.getPath('userData');
         const dbPath = path.join(userDataDir, 'shtab.db');
         const db = openDatabase(dbPath);
         // Обязательное НФТ: при каждом запуске — автобэкап с ротацией (хранится 30 копий).
+        // backupNow асинхронный (см. исправление бага) — ждём фактической записи файла.
         try {
-            backupNow(dbPath, path.join(userDataDir, 'backups'));
+            await backupNow(dbPath, path.join(userDataDir, 'backups'));
         }
         catch (err) {
             console.error('Не удалось сделать резервную копию:', err);

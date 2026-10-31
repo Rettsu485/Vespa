@@ -303,8 +303,11 @@ export class TaskRepo {
     const today = todayIso();
     const conds: string[] = [];
     const params: Record<string, unknown> = {};
+    // Архив задач по ТЗ = статусы «выполнено» и «отменено»: скрываем их из списка
+    // (и из канбана) по умолчанию. Флаг archived учитывается отдельно (soft-delete).
     if (!opts.includeArchived) {
-      conds.push("archived = 0");
+      conds.push('archived = 0');
+      conds.push("status NOT IN ('выполнено', 'отменено')");
     }
     if (opts.status) {
       conds.push('status = @status');
