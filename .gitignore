@@ -1,0 +1,18 @@
+dist-electron-types/
+*.tsbuildinfo
+*.db-shm
+*.db-wal
+
+# Артефакты сборки и тестовых прогонов (не коммитить)
+node_modules/
+dist/
+out/
+release/
+build/
+.smoke/
+dist-electron/
+dist-*-types/
+backups/
+*.db
+*.db-journal
+*.log

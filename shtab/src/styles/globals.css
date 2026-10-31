@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Дизайн-система shadcn/ui: CSS-переменные тем. Тёмная/светлая + системная по умолчанию. */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 20% 12%;
+    --primary: 224 76% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 224 20% 20%;
+    --muted: 220 16% 95%;
+    --muted-foreground: 222 12% 44%;
+    --accent: 224 70% 94%;
+    --accent-foreground: 224 60% 30%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 224 76% 48%;
+    --radius: 0.6rem;
+  }
+
+  .dark {
+    --background: 224 24% 8%;
+    --foreground: 220 14% 92%;
+    --card: 224 22% 11%;
+    --card-foreground: 220 14% 92%;
+    --popover: 224 22% 11%;
+    --popover-foreground: 220 14% 92%;
+    --primary: 218 80% 62%;
+    --primary-foreground: 224 30% 10%;
+    --secondary: 223 16% 18%;
+    --secondary-foreground: 220 14% 90%;
+    --muted: 223 16% 16%;
+    --muted-foreground: 221 12% 64%;
+    --accent: 223 30% 22%;
+    --accent-foreground: 220 60% 85%;
+    --destructive: 0 68% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 223 16% 20%;
+    --input: 223 16% 22%;
+    --ring: 218 80% 62%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  }
+}
