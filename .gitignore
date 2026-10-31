@@ -1,4 +1,2 @@
 dist-electron-types/
-dist-electron/
-dist-web-types/
-*.log
+*.tmp.cjs

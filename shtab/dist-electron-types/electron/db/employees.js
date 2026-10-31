@@ -150,11 +150,11 @@ export class EmployeeRepo {
             params.toDate = opts.toDate;
         }
         const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
-        const rows = this.db
-            .prepare(`SELECT a.*, e.full_name AS employee_name FROM absences a
-         JOIN employees e ON e.id = a.employee_id ${where}
-         ORDER BY a.date_from ASC`)
-            .all(params);
+        // Фикс бага привязки better-sqlite3: пустой {} параметров искажает запрос без плейсхолдеров.
+        const stmt = this.db.prepare(`SELECT a.*, e.full_name AS employee_name FROM absences a
+       JOIN employees e ON e.id = a.employee_id ${where}
+       ORDER BY a.date_from ASC`);
+        const rows = (Object.keys(params).length === 0 ? stmt.all() : stmt.all(params));
         return rows.map((r) => ({
             id: r.id,
             employee_id: r.employee_id,

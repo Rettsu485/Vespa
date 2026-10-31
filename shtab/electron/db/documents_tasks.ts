@@ -75,15 +75,15 @@ export class EdoRepo {
       params.todayPlus3 = addDays(today, 3);
     }
     const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
-    // Сортировка по умолчанию: срок по возрастанию; снятые с контроля — в конец.
-    const rows = this.db
-      .prepare(
-        `SELECT ed.*, e.full_name AS responsible_name FROM edo_documents ed
-         LEFT JOIN employees e ON e.id = ed.responsible_id
-         ${where}
-         ORDER BY ed.off_control ASC, ed.deadline IS NULL, ed.deadline ASC, ed.doc_number COLLATE NOCASE`,
-      )
-      .all(params) as EdoRow[];
+    // Фикс бага привязки better-sqlite3: пустой объект параметров {} в запросе без
+    // плейсхолдеров искажает результат. Если параметров нет — вызываем .all() без аргумента.
+    const stmt = this.db.prepare(
+      `SELECT ed.*, e.full_name AS responsible_name FROM edo_documents ed
+       LEFT JOIN employees e ON e.id = ed.responsible_id
+       ${where}
+       ORDER BY ed.off_control ASC, ed.deadline IS NULL, ed.deadline ASC, ed.doc_number COLLATE NOCASE`,
+    );
+    const rows = (Object.keys(params).length === 0 ? stmt.all() : stmt.all(params)) as EdoRow[];
     return rows.map((r) => this.toView(r, today));
   }
 
@@ -317,17 +317,22 @@ export class TaskRepo {
       params.status = opts.status;
     }
     const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
-    const rows = this.db
-      .prepare(
-        `SELECT t.*,
+    // ВАЖНО: в SELECT перечисляем столбцы tasks ЯВНО (не t.*), чтобы порядок и состав
+    // столбцов был строго фиксирован. При «t.* + подзапросы» в некоторых сборках better-sqlite3
+    // с пустым объектом параметров {} привязывали лишний параметр/искажали строки
+    // (баг, воспроизведённый в смоук-тесте: 1 строка вместо 9).
+    const sql = `SELECT t.id, t.theme, t.title, t.priority, t.deadline, t.status, t.wait_until,
+            t.next_action, t.participants, t.note, t.archived, t.created_at, t.updated_at,
           (SELECT COUNT(*) FROM task_check_items c WHERE c.task_id=t.id) AS check_total,
           (SELECT COUNT(*) FROM task_check_items c WHERE c.task_id=t.id AND c.done=1) AS check_done,
           (SELECT MAX(created_at) FROM task_check_items c WHERE c.task_id=t.id) AS last_check_change
          FROM tasks t ${where}
          ORDER BY CASE t.priority WHEN 'срочно' THEN 0 WHEN 'высокий' THEN 1 WHEN 'обычный' THEN 2 ELSE 3 END,
-                  t.deadline IS NULL, t.deadline ASC, t.updated_at DESC`,
-      )
-      .all(params) as TaskRow[];
+                  t.deadline IS NULL, t.deadline ASC, t.updated_at DESC`;
+    // Фикс бага привязки better-sqlite3: пустой объект параметров {} в запросе без
+    // плейсхолдеров искажает результат. Если параметров нет — вызываем .all() без аргумента.
+    const stmt = this.db.prepare(sql);
+    const rows = (Object.keys(params).length === 0 ? stmt.all() : stmt.all(params)) as TaskRow[];
 
     return rows.map((r) => {
       const daysLeft = r.deadline ? daysBetween(today, r.deadline) : null;

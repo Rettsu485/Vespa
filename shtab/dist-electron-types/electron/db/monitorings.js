@@ -78,7 +78,9 @@ export class MonitoringRepo {
         }
         const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
         const sql = `${this.baseSql()} ${where} ORDER BY m.deadline IS NULL, m.deadline ASC, m.name COLLATE NOCASE`;
-        const rows = this.db.prepare(sql).all(params);
+        // Фикс бага привязки better-sqlite3: пустой {} параметров искажает запрос без плейсхолдеров.
+        const stmt = this.db.prepare(sql);
+        const rows = (Object.keys(params).length === 0 ? stmt.all() : stmt.all(params));
         return rows.map((r) => this.toView(r, today));
     }
     get(id) {
