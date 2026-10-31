@@ -43,7 +43,7 @@ export function backupNow(dbPath: string, backupsDir: string): string {
   // «холодная» консистентная копия через backup API better-sqlite3.
   const source = new Database(dbPath, { readonly: true });
   try {
-    source.backup(target);
+    source.backup(target).then(() => undefined, (e) => console.error('backup failed:', e));
   } finally {
     source.close();
   }

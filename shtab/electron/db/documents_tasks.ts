@@ -304,7 +304,7 @@ export class TaskRepo {
     const conds: string[] = [];
     const params: Record<string, unknown> = {};
     if (!opts.includeArchived) {
-      conds.push("status NOT IN ('выполнено','отменено') AND archived = 0");
+      conds.push("archived = 0");
     }
     if (opts.status) {
       conds.push('status = @status');

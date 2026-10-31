@@ -40,7 +40,7 @@ export function Button({
 }
 
 /* ---------- Input / Textarea / Select ---------- */
-export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { ref?: React.Ref<HTMLInputElement> }) {
   return (
     <input
       className={cn(
@@ -86,7 +86,7 @@ export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLab
 }
 
 /* ---------- Badge ---------- */
-type BadgeTone = 'neutral' | 'blue' | 'green' | 'orange' | 'red' | 'gray' | 'violet';
+export type BadgeTone = 'neutral' | 'blue' | 'green' | 'orange' | 'red' | 'gray' | 'violet';
 export function Badge({ tone = 'neutral', className, children }: { tone?: BadgeTone; className?: string; children: ReactNode }) {
   const tones: Record<BadgeTone, string> = {
     neutral: 'bg-secondary text-secondary-foreground border-border',

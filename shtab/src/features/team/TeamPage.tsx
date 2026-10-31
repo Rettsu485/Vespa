@@ -170,7 +170,7 @@ export function EmployeeRow({ emp, view, onOpen }: { emp: EmployeeView; view: 'c
           <span className="truncate text-sm font-medium">{emp.full_name}</span>
           {birthdaySoon ? (
             <Badge tone="orange">
-              🎂 {emp.days_to_birthday === 0 ? 'сегодня' : `через ${emp.days_to_birthday} ${plural(emp.days_to_birthday, 'день', 'дня', 'дней')}`}
+              🎂 {emp.days_to_birthday === 0 ? 'сегодня' : `через ${emp.days_to_birthday ?? 0} ${plural(emp.days_to_birthday ?? 0, 'день', 'дня', 'дней')}`}
             </Badge>
           ) : null}
           {emp.archived ? <Badge tone="gray">архив</Badge> : null}
