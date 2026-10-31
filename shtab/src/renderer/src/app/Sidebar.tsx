@@ -2,7 +2,7 @@
 
 import { ClipboardList, FileText, LayoutDashboard, Radio, Settings, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { MonitorSun, Moon, Sun } from 'lucide-react';
+import { Laptop, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/renderer/src/lib/theme';
 import type { ThemeMode } from '@/shared/types';
 import { cn } from '@/renderer/src/lib/cn';
@@ -21,7 +21,7 @@ const THEME_LABEL: Record<ThemeMode, string> = { system: 'Системная', l
 
 export function Sidebar() {
   const { mode, setMode } = useTheme();
-  const Icon = mode === 'system' ? MonitorSun : mode === 'light' ? Sun : Moon;
+  const Icon = mode === 'system' ? Laptop : mode === 'light' ? Sun : Moon;
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r bg-card">

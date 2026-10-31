@@ -2,7 +2,7 @@
 // sandbox:false → обычный require, esbuild собирает в CJS.
 
 import { contextBridge, ipcRenderer } from 'electron';
-import { IPC_CHANNEL, apiMethodsList, type ApiMethodName, type IpcResponse, type ShtabApi } from '../shared/ipc';
+import { IPC_CHANNEL, METHOD_NAMES, type ApiMethodName, type IpcResponse, type ShtabApi } from '../shared/ipc';
 
 let counter = 0;
 
@@ -15,7 +15,7 @@ function call(method: ApiMethodName, ...args: unknown[]): Promise<unknown> {
 }
 
 const api: ShtabApi = Object.fromEntries(
-  (Object.keys(apiMethodsList) as ApiMethodName[]).map((method) => [
+  METHOD_NAMES.map((method) => [
     method,
     (...args: unknown[]) => call(method, ...args),
   ])

@@ -65,143 +65,97 @@ export interface AbsenceTimelineItem {
   note: string;
 }
 
-export type ApiMethodName = keyof typeof apiMethodsList;
+export type ApiMethodName = keyof ApiMethods;
 
 /** Перечень методов — единый источник правды для main и preload. */
-export const apiMethodsList = {
+export interface ApiMethods {
   // Настройки
-  settingsGet: () => undefined,
-  settingsSet: (_patch: Partial<AppSettings>) => undefined,
+  settingsGet: () => AppSettings;
+  settingsSet: (patch: Partial<AppSettings>) => AppSettings;
 
   // Команда
-  departmentList: () => undefined,
-  departmentTree: () => undefined,
-  departmentCreate: (_input: DepartmentInput) => undefined,
-  departmentUpdate: (_id: number, _input: DepartmentInput) => undefined,
-  departmentDelete: (_id: number) => undefined,
-  employeeList: (_opts: { includeArchived: boolean }) => undefined,
-  employeeGet: (_id: number) => undefined,
-  employeeCreate: (_input: EmployeeInput) => undefined,
-  employeeUpdate: (_id: number, _input: EmployeeInput) => undefined,
-  employeeArchive: (_id: number, _archived: boolean) => undefined,
-  absenceListByEmployee: (_employeeId: number) => undefined,
-  absenceCreate: (_input: AbsenceInput) => undefined,
-  absenceUpdate: (_id: number, _input: AbsenceInput) => undefined,
-  absenceDelete: (_id: number) => undefined,
-  absenceTimeline: (_daysAhead: number) => undefined,
+  departmentList: () => Department[];
+  departmentTree: () => DepartmentNode[];
+  departmentCreate: (input: DepartmentInput) => Department;
+  departmentUpdate: (id: number, input: DepartmentInput) => Department;
+  departmentDelete: (id: number) => void;
+  employeeList: (opts: { includeArchived: boolean }) => EmployeeView[];
+  employeeGet: (id: number) => EmployeeView | null;
+  employeeCreate: (input: EmployeeInput) => EmployeeView;
+  employeeUpdate: (id: number, input: EmployeeInput) => EmployeeView;
+  employeeArchive: (id: number, archived: boolean) => EmployeeView;
+  absenceListByEmployee: (employeeId: number) => Absence[];
+  absenceCreate: (input: AbsenceInput) => Absence;
+  absenceUpdate: (id: number, input: AbsenceInput) => Absence;
+  absenceDelete: (id: number) => void;
+  absenceTimeline: (daysAhead: number) => AbsenceTimelineItem[];
 
   // Мониторинги
-  taskTypeList: (_opts?: { includeInactive?: boolean }) => undefined,
-  taskTypeCreate: (_input: TaskTypeInput) => undefined,
-  taskTypeUpdate: (_id: number, _input: TaskTypeInput) => undefined,
-  taskTypeDelete: (_id: number) => undefined,
-  taskTypeReorder: (_orderedIds: number[]) => undefined,
-  monitoringList: (_opts: { typeId?: number | null; employeeId?: number | null; status?: string | null; includeArchived?: boolean }) => undefined,
-  monitoringGet: (_id: number) => undefined,
-  monitoringCreate: (_input: MonitoringInput) => undefined,
-  monitoringUpdate: (_id: number, _input: MonitoringInput) => undefined,
-  monitoringArchive: (_id: number) => undefined,
+  taskTypeList: (opts?: { includeInactive?: boolean }) => TaskType[];
+  taskTypeCreate: (input: TaskTypeInput) => TaskType;
+  taskTypeUpdate: (id: number, input: TaskTypeInput) => TaskType;
+  taskTypeDelete: (id: number) => void;
+  taskTypeReorder: (orderedIds: number[]) => void;
+  monitoringList: (opts: { typeId?: number | null; employeeId?: number | null; status?: string | null; includeArchived?: boolean }) => MonitoringView[];
+  monitoringGet: (id: number) => MonitoringView | null;
+  monitoringCreate: (input: MonitoringInput) => MonitoringView;
+  monitoringUpdate: (id: number, input: MonitoringInput) => MonitoringView;
+  monitoringArchive: (id: number) => MonitoringView;
 
   // ЭДО
-  edoList: (_opts: {
+  edoList: (opts: {
     controlType?: string | null;
     offControl?: 'all' | 'on' | 'off';
     responsibleId?: number | null;
     approvalStatus?: string | null;
     burning?: boolean;
     includeArchived?: boolean;
-  }) => undefined,
-  edoGet: (_id: number) => undefined,
-  edoCreate: (_input: EdoDocumentInput) => undefined,
-  edoUpdate: (_id: number, _input: EdoDocumentInput) => undefined,
-  edoSetOffControl: (_id: number, _off: boolean) => undefined,
-  edoArchive: (_id: number) => undefined,
+  }) => EdoDocumentView[];
+  edoGet: (id: number) => EdoDocumentView | null;
+  edoCreate: (input: EdoDocumentInput) => EdoDocumentView;
+  edoUpdate: (id: number, input: EdoDocumentInput) => EdoDocumentView;
+  edoSetOffControl: (id: number, off: boolean) => EdoDocumentView;
+  edoArchive: (id: number) => EdoDocumentView;
 
   // Журнал проделанной работы
-  workLogList: (_entityType: 'edo' | 'task', _entityId: number) => undefined,
-  workLogAdd: (_input: WorkLogInput) => undefined,
-  workLogDelete: (_id: number) => undefined,
+  workLogList: (entityType: 'edo' | 'task', entityId: number) => WorkLogEntry[];
+  workLogAdd: (input: WorkLogInput) => WorkLogEntry;
+  workLogDelete: (id: number) => void;
 
   // Задачи
-  taskList: (_opts: { includeArchived?: boolean; status?: string | null }) => undefined,
-  taskGet: (_id: number) => undefined,
-  taskCreate: (_input: TaskInput) => undefined,
-  taskUpdate: (_id: number, _input: TaskInput) => undefined,
-  taskSetStatus: (_id: number, _status: string) => undefined,
-  taskArchive: (_id: number) => undefined,
-  checkItemList: (_taskId: number) => undefined,
-  checkItemCreate: (_input: CheckItemInput) => undefined,
-  checkItemUpdate: (_id: number, _patch: Partial<CheckItemInput>) => undefined,
-  checkItemDelete: (_id: number) => undefined,
+  taskList: (opts: { includeArchived?: boolean; status?: string | null }) => TaskView[];
+  taskGet: (id: number) => TaskView | null;
+  taskCreate: (input: TaskInput) => TaskView;
+  taskUpdate: (id: number, input: TaskInput) => TaskView;
+  taskSetStatus: (id: number, status: string) => TaskView;
+  taskArchive: (id: number) => TaskView;
+  checkItemList: (taskId: number) => TaskCheckItem[];
+  checkItemCreate: (input: CheckItemInput) => TaskCheckItem;
+  checkItemUpdate: (id: number, patch: Partial<CheckItemInput>) => TaskCheckItem;
+  checkItemDelete: (id: number) => void;
 
   // Дашборд / поиск / обслуживание
-  dashboardGet: () => undefined,
-  searchGlobal: (_query: string) => undefined,
-  backupNow: () => undefined,
-  demoLoad: () => undefined,
-  wipeAll: () => undefined,
-} satisfies Record<string, (...args: never[]) => never>;
-
-/** Типы возвращаемых значений методов (для строгой типизации клиента). */
-export interface ApiReturnTypes {
-  settingsGet: AppSettings;
-  settingsSet: AppSettings;
-
-  departmentList: Department[];
-  departmentTree: DepartmentNode[];
-  departmentCreate: Department;
-  departmentUpdate: Department;
-  departmentDelete: void;
-  employeeList: EmployeeView[];
-  employeeGet: EmployeeView | null;
-  employeeCreate: EmployeeView;
-  employeeUpdate: EmployeeView;
-  employeeArchive: EmployeeView;
-  absenceListByEmployee: Absence[];
-  absenceCreate: Absence;
-  absenceUpdate: Absence;
-  absenceDelete: void;
-  absenceTimeline: AbsenceTimelineItem[];
-
-  taskTypeList: TaskType[];
-  taskTypeCreate: TaskType;
-  taskTypeUpdate: TaskType;
-  taskTypeDelete: void;
-  taskTypeReorder: void;
-  monitoringList: MonitoringView[];
-  monitoringGet: MonitoringView | null;
-  monitoringCreate: MonitoringView;
-  monitoringUpdate: MonitoringView;
-  monitoringArchive: MonitoringView;
-
-  edoList: EdoDocumentView[];
-  edoGet: EdoDocumentView | null;
-  edoCreate: EdoDocumentView;
-  edoUpdate: EdoDocumentView;
-  edoSetOffControl: EdoDocumentView;
-  edoArchive: EdoDocumentView;
-
-  workLogList: WorkLogEntry[];
-  workLogAdd: WorkLogEntry;
-  workLogDelete: void;
-
-  taskList: TaskView[];
-  taskGet: TaskView | null;
-  taskCreate: TaskView;
-  taskUpdate: TaskView;
-  taskSetStatus: TaskView;
-  taskArchive: TaskView;
-  checkItemList: TaskCheckItem[];
-  checkItemCreate: TaskCheckItem;
-  checkItemUpdate: TaskCheckItem;
-  checkItemDelete: void;
-
-  dashboardGet: DashboardData;
-  searchGlobal: SearchResults;
-  backupNow: string;
-  demoLoad: void;
-  wipeAll: void;
+  dashboardGet: () => DashboardData;
+  searchGlobal: (query: string) => SearchResults;
+  backupNow: () => string;
+  demoLoad: () => void;
+  wipeAll: () => void;
 }
+
+/** Список имён методов (runtime-данные для preload; порядок = порядок объявления). */
+export const METHOD_NAMES: ApiMethodName[] = [
+  'settingsGet', 'settingsSet',
+  'departmentList', 'departmentTree', 'departmentCreate', 'departmentUpdate', 'departmentDelete',
+  'employeeList', 'employeeGet', 'employeeCreate', 'employeeUpdate', 'employeeArchive',
+  'absenceListByEmployee', 'absenceCreate', 'absenceUpdate', 'absenceDelete', 'absenceTimeline',
+  'taskTypeList', 'taskTypeCreate', 'taskTypeUpdate', 'taskTypeDelete', 'taskTypeReorder',
+  'monitoringList', 'monitoringGet', 'monitoringCreate', 'monitoringUpdate', 'monitoringArchive',
+  'edoList', 'edoGet', 'edoCreate', 'edoUpdate', 'edoSetOffControl', 'edoArchive',
+  'workLogList', 'workLogAdd', 'workLogDelete',
+  'taskList', 'taskGet', 'taskCreate', 'taskUpdate', 'taskSetStatus', 'taskArchive',
+  'checkItemList', 'checkItemCreate', 'checkItemUpdate', 'checkItemDelete',
+  'dashboardGet', 'searchGlobal', 'backupNow', 'demoLoad', 'wipeAll',
+];
 
 /** Клиентский API (window.api в renderer). */
 export interface ShtabApi {

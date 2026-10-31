@@ -65,7 +65,7 @@ export function DatePicker({
             mode="single"
             locale={ru}
             selected={selected}
-            captionLayout="dropdown-buttons"
+            captionLayout="dropdown"
             defaultMonth={selected}
             startMonth={new Date(2000, 0)}
             endMonth={new Date(new Date().getFullYear() + 15, 11)}
@@ -131,7 +131,7 @@ export function DateRangeField({
             mode="range"
             locale={ru}
             selected={range}
-            captionLayout="dropdown-buttons"
+            captionLayout="dropdown"
             defaultMonth={range?.from}
             startMonth={new Date(2000, 0)}
             endMonth={new Date(new Date().getFullYear() + 15, 11)}
