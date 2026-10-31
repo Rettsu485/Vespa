@@ -1,8 +1,13 @@
 // Утилиты main-процесса для вычислений по датам (без зависимостей от renderer).
-import { format, parseISO, differenceInCalendarDays } from 'date-fns';
+import { format, addDays as dfAddDays, parseISO, differenceInCalendarDays } from 'date-fns';
 
 export function todayIso(): string {
   return format(new Date(), 'yyyy-MM-dd');
+}
+
+/** ISO-дата + n дней. */
+export function addDays(iso: string, n: number): string {
+  return format(dfAddDays(parseISO(iso), n), 'yyyy-MM-dd');
 }
 
 export function daysBetween(fromIso: string, toIso: string): number {
