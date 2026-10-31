@@ -39,6 +39,7 @@ export declare const IPC: {
     readonly tasksCreate: "tasks:create";
     readonly tasksUpdate: "tasks:update";
     readonly tasksArchive: "tasks:archive";
+    readonly tasksUnarchive: "tasks:unarchive";
     readonly checkItemsList: "check-items:list";
     readonly checkItemsCreate: "check-items:create";
     readonly checkItemsUpdate: "check-items:update";
@@ -119,6 +120,7 @@ export type IpcApi = {
         create(input: TaskInput): Promise<Task>;
         update(id: number, input: Partial<TaskInput>): Promise<Task>;
         archive(id: number): Promise<void>;
+        unarchive(id: number): Promise<void>;
     };
     checkItems: {
         list(taskId: number): Promise<TaskCheckItem[]>;
@@ -206,5 +208,8 @@ export interface TaskInput {
 }
 export interface TaskListOpts {
     status?: Task['status'] | null;
+    /** true — показывать и «мягко удалённые» (archived=1) задачи. */
     includeArchived?: boolean;
+    /** true — показывать архив по ТЗ: статусы «выполнено»/«отменено». */
+    includeDone?: boolean;
 }

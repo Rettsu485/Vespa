@@ -42,6 +42,8 @@ export declare class TaskRepo {
     create(input: TaskInput): Task;
     update(id: number, input: Partial<TaskInput>): Task;
     archive(id: number): void;
+    /** Возврат из мягкого архива (архивные видны только с флагом «Показывать архив»). */
+    unarchive(id: number): void;
     private byId;
     listCheckItems(taskId: number): TaskCheckItem[];
     createCheckItem(taskId: number, title: string): TaskCheckItem;

@@ -1,3 +1,4 @@
 dist-electron-types/
-*.tsbuildinfo
-.smoke/
+dist-electron/
+dist-web-types/
+*.log

@@ -218,8 +218,14 @@ export class TaskRepo {
         const today = todayIso();
         const conds = [];
         const params = {};
+        // Архив задач по ТЗ = статусы «выполнено» и «отменено»: скрываем их из списка
+        // (и из канбана) по умолчанию (includeDone). Флаг archived — мягкое удаление,
+        // учитывается отдельно (includeArchived). Пустых строк в блоке быть не должно.
         if (!opts.includeArchived) {
-            conds.push("archived = 0");
+            conds.push('archived = 0');
+        }
+        if (!opts.includeDone) {
+            conds.push("status NOT IN ('выполнено', 'отменено')");
         }
         if (opts.status) {
             conds.push('status = @status');
@@ -294,6 +300,10 @@ export class TaskRepo {
         this.db
             .prepare("UPDATE tasks SET status='отменено', archived=1, updated_at=? WHERE id=?")
             .run(nowStamp(), id);
+    }
+    /** Возврат из мягкого архива (архивные видны только с флагом «Показывать архив»). */
+    unarchive(id) {
+        this.db.prepare('UPDATE tasks SET archived=0, updated_at=? WHERE id=?').run(nowStamp(), id);
     }
     byId(id) {
         const row = this.db.prepare('SELECT * FROM tasks WHERE id=?').get(id);

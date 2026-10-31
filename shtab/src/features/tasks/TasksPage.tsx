@@ -27,8 +27,15 @@ export function TasksPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [formId, setFormId] = useState<number | 'new' | null>(null);
 
+  // showArchived = «Показывать архив»: выполненные/отменённые (архив по ТЗ)
+  // и мягко удалённые задачи (archived=1).
   const { data: tasks, loading, reload } = useAsync(
-    () => api.tasks.list({ status: (statusFilter as never) || null, includeArchived: showArchived }),
+    () =>
+      api.tasks.list({
+        status: (statusFilter as never) || null,
+        includeArchived: showArchived,
+        includeDone: showArchived,
+      }),
     [statusFilter, showArchived],
   );
 
@@ -150,6 +157,12 @@ export function TasksPage() {
               openTask(null);
               reload();
             }}
+            onRestore={async () => {
+              // Возврат из мягкого архива: снимаем archived и статус «отменено».
+              await api.tasks.update(card.id, { status: 'входящая' });
+              await api.tasks.unarchive(card.id);
+              reload();
+            }}
           />
         ) : null}
       </Sheet>
@@ -212,7 +225,7 @@ function TaskRow({ t, onOpen }: { t: TaskView; onOpen: () => void }) {
   );
 }
 
-function TaskSheet({ task, onEdit, onChanged, onArchive }: { task: TaskView; onEdit: () => void; onChanged: () => void; onArchive: () => void }) {
+function TaskSheet({ task, onEdit, onChanged, onArchive, onRestore }: { task: TaskView; onEdit: () => void; onChanged: () => void; onArchive: () => void; onRestore: () => void }) {
   const [tab, setTab] = useState('summary');
   return (
     <div className="grid gap-4">
@@ -234,7 +247,11 @@ function TaskSheet({ task, onEdit, onChanged, onArchive }: { task: TaskView; onE
             <Button variant="destructive" size="sm" onClick={onArchive}>
               <Archive className="h-4 w-4" /> В архив
             </Button>
-          ) : null}
+          ) : (
+            <Button variant="outline" size="sm" onClick={onRestore}>
+              <RotateCcw className="h-4 w-4" /> Вернуть из архива
+            </Button>
+          )}
         </div>
       </div>
 

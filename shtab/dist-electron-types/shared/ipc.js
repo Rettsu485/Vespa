@@ -38,6 +38,7 @@ export const IPC = {
     tasksCreate: 'tasks:create',
     tasksUpdate: 'tasks:update',
     tasksArchive: 'tasks:archive',
+    tasksUnarchive: 'tasks:unarchive',
     checkItemsList: 'check-items:list',
     checkItemsCreate: 'check-items:create',
     checkItemsUpdate: 'check-items:update',

@@ -91,6 +91,7 @@ export function registerIpc(db: Db, dbPath: string, userDataDir: string): void {
   handle(IPC.tasksCreate, (input) => tasks.create(input as TaskInput));
   handle(IPC.tasksUpdate, (id, input) => tasks.update(id as number, input as Partial<TaskInput>));
   handle(IPC.tasksArchive, (id) => tasks.archive(id as number));
+  handle(IPC.tasksUnarchive, (id) => tasks.unarchive(id as number));
 
   handle(IPC.checkItemsList, (taskId) => tasks.listCheckItems(taskId as number));
   handle(IPC.checkItemsCreate, (taskId, title) => tasks.createCheckItem(taskId as number, title as string));

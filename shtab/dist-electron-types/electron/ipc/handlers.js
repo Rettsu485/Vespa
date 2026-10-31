@@ -77,6 +77,7 @@ export function registerIpc(db, dbPath, userDataDir) {
     handle(IPC.tasksCreate, (input) => tasks.create(input));
     handle(IPC.tasksUpdate, (id, input) => tasks.update(id, input));
     handle(IPC.tasksArchive, (id) => tasks.archive(id));
+    handle(IPC.tasksUnarchive, (id) => tasks.unarchive(id));
     handle(IPC.checkItemsList, (taskId) => tasks.listCheckItems(taskId));
     handle(IPC.checkItemsCreate, (taskId, title) => tasks.createCheckItem(taskId, title));
     handle(IPC.checkItemsUpdate, (id, input) => tasks.updateCheckItem(id, input));

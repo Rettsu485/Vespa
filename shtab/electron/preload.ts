@@ -60,6 +60,7 @@ const api: IpcApi = {
     create: (input) => invoke(IPC.tasksCreate, input),
     update: (id, input) => invoke(IPC.tasksUpdate, id, input),
     archive: (id) => invoke(IPC.tasksArchive, id),
+    unarchive: (id) => invoke(IPC.tasksUnarchive, id),
   },
   checkItems: {
     list: (taskId) => invoke(IPC.checkItemsList, taskId),
