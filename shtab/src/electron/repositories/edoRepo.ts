@@ -2,7 +2,8 @@
 
 import type { Db } from '../db/database';
 import { daysBetween, nowSqlTimestamp, todayIso } from '../db/dates';
-import type { AppSettings, EdoDocument, EdoDocumentView, WorkLogEntry, WorkLogInput } from '../../shared/types';
+import type { AppSettings, EdoDocument, EdoDocumentView, WorkLogEntry } from '../../shared/types';
+import type { WorkLogInput } from '../../shared/ipc';
 
 interface EdoRow {
   id: number;
