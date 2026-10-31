@@ -1,2 +1,1 @@
-dist-electron-types/
-*.tmp.cjs
+node_modules/
