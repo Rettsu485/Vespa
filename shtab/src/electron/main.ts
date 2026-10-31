@@ -2,6 +2,7 @@
 
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
 import { getBackupDir, initDatabase, typed } from './db/database';
 import { TeamRepository } from './repositories/teamRepo';
 import { MonitoringRepository } from './repositories/monitoringRepo';
@@ -27,6 +28,17 @@ import {
 import type { Absence, AppSettings, EdoDocument, Employee, Monitoring, Task, TaskCheckItem, TaskType, Department } from '../shared/types';
 
 const isDev = !app.isPackaged;
+
+// В dev-режиме изолируем userData в ./.dev-userdata, чтобы не смешивать с production.
+if (isDev) {
+  const devUserData = process.env.ELECTRON_USER_DATA ?? path.join(app.getAppPath(), '.dev-userdata');
+  try {
+    fs.mkdirSync(devUserData, { recursive: true });
+    app.setPath('userData', devUserData);
+  } catch (err) {
+    console.error('Не удалось задать dev-userData:', err);
+  }
+}
 
 let mainWindow: BrowserWindow | null = null;
 

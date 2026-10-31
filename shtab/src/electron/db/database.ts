@@ -1,9 +1,16 @@
 // Подключение к SQLite (better-sqlite3, WAL) + выполнение миграций по версии схемы.
 
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
 import path from 'node:path';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import { migrations } from './migrations';
+
+// better-sqlite3 — нативный модуль, помеченный как external при сборке esbuild-ом.
+// Грузим его через createRequire: это работает независимо от ESM/CJS-окружения Electron
+// и не требует флага --experimental-require-module.
+const requireNative = createRequire(__filename);
+const SqliteDatabase = requireNative('better-sqlite3') as typeof Database;
 
 export type Db = Database.Database;
 
@@ -40,7 +47,7 @@ export function initDatabase(userDataDir: string): Db {
   if (dbInstance) return dbInstance;
   fs.mkdirSync(userDataDir, { recursive: true });
   dbFilePath = path.join(userDataDir, 'shtab.sqlite');
-  dbInstance = new Database(dbFilePath);
+  dbInstance = new SqliteDatabase(dbFilePath);
   dbInstance.pragma('journal_mode = WAL');
   dbInstance.pragma('foreign_keys = ON');
   runMigrations(dbInstance);
